@@ -1,0 +1,11 @@
+plugins{id 'java-library';id 'net.neoforged.gradle.userdev' version '7.1.39'}
+version=project.mod_version
+group=project.mod_group_id
+base.archivesName='minegeeks-for-servers-neoforge'
+java.toolchain.languageVersion=JavaLanguageVersion.of(25)
+repositories{}
+dependencies{implementation "net.neoforged:neoforge:"+project.neo_version}
+sourceSets.main.java.srcDirs=['../common/src/main/java','src/main/java']
+tasks.withType(JavaCompile).configureEach{options.release=25;options.encoding='UTF-8'}
+processResources{inputs.properties([minecraft_version:project.minecraft_version,neo_version:project.neo_version,mod_id:project.mod_id,mod_name:project.mod_name,mod_license:project.mod_license,mod_version:project.mod_version]);filesMatching(['META-INF/neoforge.mods.toml']){expand(inputs.properties.get())}}
+runs{server{workingDirectory project.layout.projectDirectory.dir('run');argument '--nogui';modSource project.sourceSets.main}}

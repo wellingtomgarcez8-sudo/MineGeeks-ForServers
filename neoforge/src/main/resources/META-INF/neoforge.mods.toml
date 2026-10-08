@@ -1,0 +1,19 @@
+license="All-Rights-Reserved"
+[[mods]]
+modId="minegeeks_for_servers"
+version="1.0.0"
+displayName="MineGeeks For Servers"
+authors="Wellingtom Garcez"
+description='''Server-side cosmic generator and custom powers for Minecraft 26.3.'''
+[[dependencies.minegeeks_for_servers]]
+modId="neoforge"
+type="required"
+versionRange="[26.3.0.52-beta,)"
+ordering="NONE"
+side="SERVER"
+[[dependencies.minegeeks_for_servers]]
+modId="minecraft"
+type="required"
+versionRange="[26.3]"
+ordering="NONE"
+side="SERVER"

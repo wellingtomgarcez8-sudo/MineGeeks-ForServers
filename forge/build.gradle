@@ -1,0 +1,16 @@
+plugins{
+ id 'java'
+ id 'eclipse'
+ id 'idea'
+ id 'maven-publish'
+ id 'net.minecraftforge.gradle' version '[7.0.29,8.0)'
+}
+version=project.version
+group=project.group
+base.archivesName='minegeeks-for-servers-forge'
+java.toolchain.languageVersion=JavaLanguageVersion.of(25)
+minecraft{mappings channel:'official',version:project.minecraft_version;runs{server{workingDirectory project.file('run');args '--nogui'}}}
+repositories{}
+dependencies{implementation minecraft.dependency("net.minecraftforge:forge:"+project.minecraft_version+"-"+project.forge_version)}
+sourceSets.main.java.srcDirs=['../common/src/main/java','src/main/java']
+tasks.withType(JavaCompile).configureEach{options.release=25;options.encoding='UTF-8'}
