@@ -2,9 +2,14 @@ package com.minegeeks.servers;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.permissions.Permissions;
@@ -15,6 +20,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.CustomData;
@@ -35,6 +41,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public final class MineGeeksCore {
+    public static final String MODID = "minegeeks_for_servers";
+    public static final ResourceKey<Item> COSMIC_STAR_KEY = ResourceKey.create(
+            Registries.ITEM,
+            Identifier.fromNamespaceAndPath(MODID, "cosmic_star"));
+    public static final Item COSMIC_STAR_ITEM = Registry.register(
+            BuiltInRegistries.ITEM,
+            COSMIC_STAR_KEY,
+            new Item(new Item.Properties().setId(COSMIC_STAR_KEY).stacksTo(1)));
+
+    public static final ResourceKey<CreativeModeTab> CREATIVE_TAB_KEY = ResourceKey.create(
+            Registries.CREATIVE_MODE_TAB,
+            Identifier.fromNamespaceAndPath(MODID, "main"));
+    public static final CreativeModeTab CREATIVE_TAB = Registry.register(
+            BuiltInRegistries.CREATIVE_MODE_TAB,
+            CREATIVE_TAB_KEY,
+            CreativeModeTab.builder()
+                    .title(Component.literal("MineGeeks For Servers"))
+                    .icon(() -> COSMIC_STAR_ITEM.getDefaultInstance())
+                    .displayItems((parameters, output) -> output.accept(COSMIC_STAR_ITEM))
+                    .build());
     public static final String STAR_KEY = "MineGeeksCosmicStar";
     public static final String POWER_KEY = "MineGeeksPower";
     public static final String SILK_KEY = "SilkTouch";
@@ -47,12 +73,16 @@ public final class MineGeeksCore {
 
     private MineGeeksCore() {}
 
+    public static void initialize() {
+        // Force class initialization on both client and server.
+    }
+
     private static ServerLevel serverLevel(ServerPlayer player) {
         return (ServerLevel) player.level();
     }
 
     public static ItemStack cosmicStar() {
-        ItemStack stack = Items.NETHER_STAR.getDefaultInstance();
+        ItemStack stack = COSMIC_STAR_ITEM.getDefaultInstance();
         CompoundTag data = new CompoundTag();
         data.putBoolean(STAR_KEY, true);
         stack.set(DataComponents.CUSTOM_DATA, CustomData.of(data));
@@ -76,7 +106,7 @@ public final class MineGeeksCore {
     }
 
     public static boolean isCosmicStar(ItemStack stack) {
-        if (stack.isEmpty() || stack.getItem() != Items.NETHER_STAR) return false;
+        if (stack.isEmpty() || stack.getItem() != COSMIC_STAR_ITEM) return false;
         CustomData data = stack.get(DataComponents.CUSTOM_DATA);
         return data != null && data.copyTag().getBoolean(STAR_KEY).orElse(false);
     }
