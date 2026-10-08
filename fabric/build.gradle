@@ -1,9 +1,9 @@
 plugins { id 'net.fabricmc.fabric-loom' version project.loom_version }
 dependencies {
-    minecraft "com.mojang:minecraft:" + project.minecraft_version
-    mappings loom.officialMojangMappings()
-    implementation "net.fabricmc:fabric-loader:" + project.loader_version
-    implementation "net.fabricmc.fabric-api:fabric-api:" + project.fabric_api_version
+ minecraft "com.mojang:minecraft:" + project.minecraft_version
+ mappings loom.officialMojangMappings()
+ implementation "net.fabricmc:fabric-loader:" + project.loader_version
+ implementation "net.fabricmc.fabric-api:fabric-api:" + project.fabric_api_version
 }
 java { toolchain.languageVersion=JavaLanguageVersion.of(25) }
 tasks.withType(JavaCompile).configureEach { options.release=25; options.encoding='UTF-8' }
