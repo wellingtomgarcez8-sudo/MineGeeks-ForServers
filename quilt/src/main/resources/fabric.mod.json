@@ -3,10 +3,11 @@
   "id": "minegeeks_for_servers",
   "version": "1.0.0",
   "name": "MineGeeks For Servers",
-  "description": "Server-side cosmic generator for Minecraft 26.3 on Quilt Loader.",
+  "description": "Cosmic mechanics and custom powers for Minecraft 26.3 on Quilt Loader. Client and server support.",
   "authors": ["Wellingtom Garcez"],
   "license": "All-Rights-Reserved",
-  "environment": "server",
+  "environment": "*",
+  "icon": "icon.png",
   "entrypoints": {
     "main": ["com.minegeeks.servers.quilt.MineGeeksQuilt"]
   },
