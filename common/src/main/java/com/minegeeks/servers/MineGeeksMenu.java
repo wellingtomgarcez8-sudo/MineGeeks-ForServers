@@ -56,10 +56,9 @@ public final class MineGeeksMenu extends ChestMenu{
         if(!(p instanceof ServerPlayer sp))return;ItemStack d=container.getItem(INPUT);if(d.isEmpty())return;
         ItemStack out=MineGeeksCore.makeGenerated(d);
         if(MineGeeksCore.flag(out,MineGeeksCore.UNBREAKABLE_KEY)){
-            out.set(DataComponents.UNBREAKABLE,net.minecraft.world.item.component.Unbreakable.EMPTY);
-            out.set(DataComponents.FIRE_RESISTANT,true);
+            out.set(DataComponents.UNBREAKABLE,net.minecraft.util.Unit.INSTANCE);
         }
-        ServerLevel level=sp.serverLevel();var pos=MineGeeksCore.generateDelivery(level,sp,out);
+        ServerLevel level=(ServerLevel)sp.level();var pos=MineGeeksCore.generateDelivery(level,sp,out);
         container.setItem(INPUT,ItemStack.EMPTY);sp.sendSystemMessage(Component.literal("MineGeeks: enviado para X="+pos.getX()+" Y="+pos.getY()+" Z="+pos.getZ()));sp.closeContainer();
     }
     @Override public void clicked(int slot,int button,ClickType type,Player p){
