@@ -60,6 +60,8 @@ public final class MineGeeksMenu extends ChestMenu{
         ItemStack out=MineGeeksCore.makeGenerated(d);
         if(MineGeeksCore.flag(out,MineGeeksCore.UNBREAKABLE_KEY)){
             out.set(DataComponents.UNBREAKABLE,net.minecraft.util.Unit.INSTANCE);
+            var resistant=Items.NETHERITE_INGOT.getDefaultInstance().get(DataComponents.DAMAGE_RESISTANT);
+            if(resistant!=null) out.set(DataComponents.DAMAGE_RESISTANT,resistant);
         }
         ServerLevel level=(ServerLevel)sp.level();var pos=MineGeeksCore.generateDelivery(level,sp,out);
         container.setItem(INPUT,ItemStack.EMPTY);sp.sendSystemMessage(Component.literal("MineGeeks: enviado para X="+pos.getX()+" Y="+pos.getY()+" Z="+pos.getZ()));sp.closeContainer();
