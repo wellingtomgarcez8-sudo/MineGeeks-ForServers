@@ -11,7 +11,7 @@ base.archivesName='minegeeks-for-servers-forge'
 java.toolchain.languageVersion=JavaLanguageVersion.of(25)
 minecraft {
  mappings channel:'official',version:project.minecraft_version
- runs { server { workingDirectory project.file('run'); args '--nogui' } }
+ runs { server { workingDir = layout.projectDirectory.dir('run'); args '--nogui' } }
 }
 repositories {
  minecraft.mavenizer(it)
