@@ -12,12 +12,12 @@ public final class MineGeeksNeoForge{
  public static final String MODID="minegeeks_for_servers";
  public MineGeeksNeoForge(){NeoForge.EVENT_BUS.register(this);}
  @net.neoforged.bus.api.SubscribeEvent public void onPlayerTick(PlayerTickEvent.Post e){
-  if(e.getEntity() instanceof net.minecraft.server.level.ServerPlayer p){MineGeeksCore.maintainStar(p);MineGeeksCore.levitationTick(p);MineGeeksCore.protectGeneratedItemEntities(p.serverLevel());}
+  if(e.getEntity() instanceof net.minecraft.server.level.ServerPlayer p){MineGeeksCore.maintainStar(p);MineGeeksCore.levitationTick(p);MineGeeksCore.protectGeneratedItemEntities((net.minecraft.server.level.ServerLevel)p.level());}
  }
  @net.neoforged.bus.api.SubscribeEvent public void onItemUse(PlayerInteractEvent.RightClickItem e){
   if(e.getLevel().isClientSide()||!(e.getEntity() instanceof net.minecraft.server.level.ServerPlayer p))return;
   var s=e.getItemStack();
-  if(MineGeeksCore.isCosmicStar(s)){if(p.hasPermissions(2))p.openMenu(MineGeeksMenuProvider.create());e.setCancellationResult(InteractionResult.SUCCESS);e.setCanceled(true);return;}
+  if(MineGeeksCore.isCosmicStar(s)){if(p.level().getServer()!=null&&p.level().getServer().getPlayerList().isOp(p.nameAndId()))p.openMenu(MineGeeksMenuProvider.create());e.cancelWithResult(InteractionResult.SUCCESS);return;}
   if(MineGeeksCore.isGenerated(s)&&MineGeeksCore.power(s,MineGeeksCore.WARDEN_KEY)>0){MineGeeksCore.wardenBurst(p.serverLevel(),p,s);e.setCancellationResult(InteractionResult.SUCCESS);e.setCanceled(true);}
  }
  @net.neoforged.bus.api.SubscribeEvent public void onBlockBreak(BreakBlockEvent e){
