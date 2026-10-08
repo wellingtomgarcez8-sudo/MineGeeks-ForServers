@@ -1,6 +1,5 @@
 package com.minegeeks.servers.fabric;
-import com.minegeeks.servers.MineGeeksCore;
-import com.minegeeks.servers.MineGeeksMenuProvider;
+import com.minegeeks.servers.*;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.PlayerBlockBreakEvents;
