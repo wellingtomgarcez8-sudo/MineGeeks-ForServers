@@ -14,6 +14,7 @@ import net.minecraft.world.InteractionResult;
 public final class MineGeeksQuilt implements ModInitializer {
     @Override
     public void onInitialize() {
+        MineGeeksCore.initialize();
         UseItemCallback.EVENT.register((player, world, hand) -> {
             if (world.isClientSide() || !(player instanceof ServerPlayer serverPlayer)) {
                 return InteractionResult.PASS;
