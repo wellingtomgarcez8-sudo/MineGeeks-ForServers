@@ -75,7 +75,7 @@ public final class MineGeeksCore {
         CompoundTag t=customData(s); int v=t.getInt(key).orElse(0); v=v>=max?0:v+1; t.putInt(key,v); t.putBoolean(POWER_KEY,true); setCustomData(s,t);
     }
     public static void toggleFlag(ItemStack s,String key){
-        CompoundTag t=customData(s); t.putBoolean(key,!t.getBoolean(key)); t.putBoolean(POWER_KEY,true); setCustomData(s,t);
+        CompoundTag t=customData(s); t.putBoolean(key,!t.getBoolean(key).orElse(false)); t.putBoolean(POWER_KEY,true); setCustomData(s,t);
     }
     public static boolean isOre(BlockState s){return s.is(net.minecraft.tags.BlockTags.ORES);}
 
@@ -86,7 +86,7 @@ public final class MineGeeksCore {
         if(!active)return;
         BlockEntity be=level.getBlockEntity(pos); boolean ore=isOre(state);
         if(silk>0 && !(ore&&power(tool,EFFICIENCY_KEY)>0)){
-            ItemStack clone=state.getBlock().getCloneItemStack(level,pos,state);
+            ItemStack clone=new ItemStack(state.getBlock().asItem());
             level.setBlock(pos,Blocks.AIR.defaultBlockState(),Block.UPDATE_ALL);
             if(!clone.isEmpty())Block.popResource(level,pos,clone);
             state.spawnAfterBreak(level,pos,tool,true);
@@ -103,7 +103,7 @@ public final class MineGeeksCore {
             if(!d.isEmpty())Block.popResource(level,pos,d);
         }
         state.spawnAfterBreak(level,pos,tool,true);
-        damageToolIfNeeded(tool);
+        damageToolIfNeeded(player,tool);
     }
     private static void damageToolIfNeeded(ServerPlayer player, ItemStack tool){
         if(flag(tool,UNBREAKABLE_KEY))return;
@@ -148,35 +148,33 @@ public final class MineGeeksCore {
         if(star==null)star=cosmicStar();
         if(!last.isEmpty()&&!isCosmicStar(last)){
             p.getInventory().setItem(8,ItemStack.EMPTY);
-            p.getInventory().placeItemBackInInventory(last);
+            p.getInventory().placeItemBackInInventory(last,net.minecraft.util.Prediction.SERVER_ONLY);
         }
         p.getInventory().setItem(8,star);
         for(Entity e:p.level().getEntities(p,p.getBoundingBox().inflate(2),x->x instanceof ItemEntity ie&&isCosmicStar(ie.getItem())))e.discard();
     }
 
-    private static CompoundTag serializeItem(ServerLevel level,ItemStack stack){
-        var out=net.minecraft.world.level.storage.TagValueOutput.createWithContext(net.minecraft.util.ProblemReporter.DISCARDING,level.registryAccess());
-        out.store("item",ItemStack.CODEC,stack);
-        return out.buildResult().getCompound("item").orElse(new CompoundTag());
-    }
     public static void prepareOutputShulker(ServerLevel level,ServerPlayer player,BlockPos pos){
-        CompoundTag boxData=new CompoundTag(); boxData.putString("id","minecraft:shulker_box");
-        ListTag items=new ListTag();
-        for(int slot=0;slot<26;slot++){CompoundTag t=serializeItem(level,new ItemStack(Items.DIRT));t.putByte("Slot",(byte)slot);items.add(t);}
-        ItemStack paper=new ItemStack(Items.PAPER);paper.set(DataComponents.CUSTOM_NAME,Component.literal("Coordenada do Item"));
-        CompoundTag pd=new CompoundTag();pd.putBoolean("MineGeeksCoordinatePaper",true);pd.putInt("X",pos.getX());pd.putInt("Y",pos.getY());pd.putInt("Z",pos.getZ());setCustomData(paper,pd);
-        CompoundTag pt=serializeItem(level,paper);pt.putByte("Slot",(byte)26);items.add(pt);boxData.put("Items",items);
-        ItemStack shulker=new ItemStack(Items.BLACK_SHULKER_BOX);
-        shulker.set(DataComponents.BLOCK_ENTITY_DATA,CustomData.of(boxData));
+        List<ItemStack> contents=new java.util.ArrayList<>();
+        for(int i=0;i<26;i++) contents.add(new ItemStack(Items.DIRT));
+        ItemStack paper=new ItemStack(Items.PAPER);
+        paper.set(DataComponents.CUSTOM_NAME,Component.literal("Coordenada do Item"));
+        CompoundTag pd=new CompoundTag();
+        pd.putBoolean("MineGeeksCoordinatePaper",true);
+        pd.putInt("X",pos.getX()); pd.putInt("Y",pos.getY()); pd.putInt("Z",pos.getZ());
+        setCustomData(paper,pd);
+        contents.add(paper);
+        ItemStack shulker=Items.DYED_SHULKER_BOX.black().getDefaultInstance();
+        shulker.set(DataComponents.CONTAINER,net.minecraft.world.item.component.ItemContainerContents.fromItems(contents));
         shulker.set(DataComponents.CUSTOM_NAME,Component.literal("Entrega Cósmica"));
-        player.getInventory().placeItemBackInInventory(shulker);
+        player.getInventory().placeItemBackInInventory(shulker,net.minecraft.util.Prediction.SERVER_ONLY);
     }
     public static BlockPos randomDeliveryPosition(ServerLevel level,ServerPlayer p){
         RandomSource r=level.getRandom();double a=r.nextDouble()*Math.PI*2,d=Math.sqrt(r.nextDouble())*2000;
         return new BlockPos(Mth.floor(p.getX()+Math.cos(a)*d),Mth.nextInt(r,-50,100),Mth.floor(p.getZ()+Math.sin(a)*d));
     }
     public static BlockPos generateDelivery(ServerLevel level,ServerPlayer p,ItemStack generated){
-        BlockPos pos=randomDeliveryPosition(level,p);ChunkPos c=new ChunkPos(pos);
+        BlockPos pos=randomDeliveryPosition(level,p);ChunkPos c=new ChunkPos(pos.getX() >> 4,pos.getZ() >> 4);
         level.getChunk(c.x(),c.z(),ChunkStatus.FULL,true);
         level.setBlock(pos,Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING,p.getDirection().getOpposite()),Block.UPDATE_ALL);
         BlockEntity e=level.getBlockEntity(pos);if(e instanceof ChestBlockEntity chest){chest.setItem(0,generated.copy());chest.setChanged();}
