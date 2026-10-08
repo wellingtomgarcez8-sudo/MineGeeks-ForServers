@@ -20,6 +20,7 @@ public final class MineGeeksForge {
     public static final String MODID = "minegeeks_for_servers";
 
     public MineGeeksForge() {
+        MineGeeksCore.initialize();
         BusGroup.DEFAULT.register(MethodHandles.lookup(), MineGeeksForge.class);
     }
 
