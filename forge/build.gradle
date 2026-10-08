@@ -1,4 +1,10 @@
-plugins { id 'java'; id 'eclipse'; id 'idea'; id 'maven-publish'; id 'net.minecraftforge.gradle' version '[7.0.17,8)' }
+plugins {
+ id 'java'
+ id 'eclipse'
+ id 'idea'
+ id 'maven-publish'
+ id 'net.minecraftforge.gradle' version '[7.0.17,8)'
+}
 version=project.version
 group=project.group
 base.archivesName='minegeeks-for-servers-forge'
