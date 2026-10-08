@@ -1,1 +1,4 @@
-{"item.minecraft.nether_star":"Estrela Cósmica"}
+{
+  "item.minecraft.nether_star": "Estrela Cósmica",
+  "item.minegeeks_for_servers.cosmic_star": "Cosmic Star"
+}
