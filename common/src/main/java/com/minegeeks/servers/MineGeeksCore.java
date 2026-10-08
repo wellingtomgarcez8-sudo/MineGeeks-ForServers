@@ -67,7 +67,10 @@ public final class MineGeeksCore {
     public static int power(ItemStack s,String k){return customData(s).getInt(k).orElse(0);}
     public static boolean flag(ItemStack s,String k){return customData(s).getBoolean(k).orElse(false);}
     public static ItemStack makeGenerated(ItemStack src){
-        ItemStack out=src.copy(); CompoundTag t=customData(out); t.putBoolean(POWER_KEY,true); setCustomData(out,t);
+        ItemStack out=src.copy();
+        CompoundTag t=customData(out);
+        t.putBoolean(POWER_KEY,true);
+        setCustomData(out,t);
         out.set(DataComponents.CUSTOM_NAME,Component.literal("MineGeeks: "+src.getHoverName().getString()));
         return out;
     }
@@ -151,7 +154,8 @@ public final class MineGeeksCore {
             p.getInventory().placeItemBackInInventory(last,net.minecraft.util.Prediction.SERVER_ONLY);
         }
         p.getInventory().setItem(8,star);
-        for(Entity e:p.level().getEntities(p,p.getBoundingBox().inflate(2),x->x instanceof ItemEntity ie&&isCosmicStar(ie.getItem())))e.discard();
+        for(Entity e:p.level().getEntities(p,p.getBoundingBox().inflate(32),
+                x->x instanceof ItemEntity ie&&isCosmicStar(ie.getItem()))) e.discard();
     }
 
     public static void prepareOutputShulker(ServerLevel level,ServerPlayer player,BlockPos pos){
