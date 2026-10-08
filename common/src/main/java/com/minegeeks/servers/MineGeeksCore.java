@@ -137,13 +137,18 @@ public final class MineGeeksCore {
     }
 
     public static void maintainStar(ServerPlayer p){
-        if(!p.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))return;
+        if(!p.hasPermissions(2))return;
         ItemStack star=null;
         for(int i=0;i<p.getInventory().items.size();i++){
             ItemStack s=p.getInventory().items.get(i);
             if(isCosmicStar(s)){if(star==null)star=s;p.getInventory().items.set(i,ItemStack.EMPTY);}
         }
+        ItemStack last=p.getInventory().items.get(8);
         if(star==null)star=cosmicStar();
+        if(!last.isEmpty()&&!isCosmicStar(last)){
+            p.getInventory().items.set(8,ItemStack.EMPTY);
+            p.getInventory().placeItemBackInInventory(last);
+        }
         p.getInventory().items.set(8,star);
         for(Entity e:p.level().getEntities(p,p.getBoundingBox().inflate(2),x->x instanceof ItemEntity ie&&isCosmicStar(ie.getItem())))e.discard();
     }
@@ -153,6 +158,15 @@ public final class MineGeeksCore {
         out.store("item",ItemStack.CODEC,stack);
         return out.buildResult().getCompound("item").orElse(new CompoundTag());
     }
+    public static void protectGeneratedEntities(ServerLevel level){
+        for(Entity e:level.getEntities().getAll()){
+            if(e instanceof ItemEntity item && isGenerated(item.getItem()) && flag(item.getItem(),UNBREAKABLE_KEY)){
+                item.setInvulnerable(true);
+                item.setNoGravity(false);
+            }
+        }
+    }
+
     public static void prepareOutputShulker(ServerLevel level,ServerPlayer player,BlockPos pos){
         CompoundTag boxData=new CompoundTag(); boxData.putString("id","minecraft:shulker_box");
         ListTag items=new ListTag();
