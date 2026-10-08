@@ -3,7 +3,7 @@ buildscript {
  root.load(new FileInputStream(file('../gradle.properties')))
  root.each { k,v -> ext.set(k.toString(),v.toString()) }
 }
-plugins { id 'org.quiltmc.loom.no_remap' version project.quilt_loom_version }
+plugins { id 'org.quiltmc.loom.no_remap' version "${quilt_loom_version}" }
 repositories { maven { url='https://maven.quiltmc.org/repository/release' }; maven { url='https://maven.fabricmc.net' } }
 dependencies {
  minecraft "com.mojang:minecraft:"+project.minecraft_version
