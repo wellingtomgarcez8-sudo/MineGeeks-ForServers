@@ -73,6 +73,3 @@ processResources {
     }
 }
 
-jar {
-    finalizedBy 'reobfJar'
-}
