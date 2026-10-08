@@ -1,6 +1,8 @@
 package com.minegeeks.servers;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.util.Unit;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -36,7 +38,7 @@ public final class MineGeeksMenu extends ChestMenu{
         return stack;
     }
     private void refresh(){
-        for(int i=0;i<SIZE;i++)if(i!=INPUT)container.setItem(i,button(Blocks.GRAY_STAINED_GLASS_PANE.asItem()," "));
+        for(int i=0;i<SIZE;i++)if(i!=INPUT)container.setItem(i,button(Blocks.GRAY_STAINED_GLASS.asItem()," "));
         ItemStack d=container.getItem(INPUT);
         container.setItem(4,button(Items.NETHER_STAR,"GERADOR MineGeeks","Coloque um item no slot central.","Poderes próprios do MineGeeks."));
         container.setItem(45,button(Items.NETHER_STAR,"Silk Touch","Nível: "+MineGeeksCore.power(d,MineGeeksCore.SILK_KEY),"0/1"));
@@ -69,8 +71,8 @@ public final class MineGeeksMenu extends ChestMenu{
         ItemStack draft=container.getItem(INPUT);if(draft.isEmpty())return;
         ItemStack generated=MineGeeksCore.makeGenerated(draft);
         if(MineGeeksCore.flag(generated,MineGeeksCore.UNBREAKABLE_KEY))
-            generated.set(DataComponents.UNBREAKABLE,net.minecraft.world.item.component.Unbreakable.EMPTY);
-        ServerLevel level=serverPlayer.serverLevel();
+            generated.set(DataComponents.UNBREAKABLE,Unit.INSTANCE);
+        ServerLevel level=(ServerLevel)serverPlayer.level();
         BlockPos pos=MineGeeksCore.generateDelivery(level,serverPlayer,generated);
         container.setItem(INPUT,ItemStack.EMPTY);
         serverPlayer.sendSystemMessage(Component.literal("MineGeeks: item criado em X="+pos.getX()+" Y="+pos.getY()+" Z="+pos.getZ()));
