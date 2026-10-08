@@ -1,1 +1,12 @@
-{"schemaVersion":1,"id":"minegeeks_for_servers","version":"1.0.0","name":"MineGeeks For Servers","description":"Server-side cosmic generator and custom powers for Minecraft 26.3.","authors":["Wellingtom Garcez"],"license":"All-Rights-Reserved","environment":"server","entrypoints":{"main":["com.minegeeks.servers.fabric.MineGeeksFabric"]},"depends":{"fabricloader":">=0.19.5","minecraft":"~26.3","java":">=25","fabric-api":"*"}}
+{
+ "schemaVersion":1,
+ "id":"minegeeks_for_servers",
+ "version":"\${version}",
+ "name":"MineGeeks For Servers",
+ "description":"Server-side cosmic generator and custom powers for Minecraft 26.3.",
+ "authors":["Wellingtom Garcez"],
+ "license":"All-Rights-Reserved",
+ "environment":"server",
+ "entrypoints":{"main":["com.minegeeks.servers.fabric.MineGeeksFabric"]},
+ "depends":{"fabricloader":">=0.19.5","minecraft":"~26.3","java":">=25","fabric-api":"*"}
+}
