@@ -1,16 +1,26 @@
-buildscript {
- Properties root=new Properties()
- root.load(new FileInputStream(file('../gradle.properties')))
- root.each { k,v -> ext.set(k.toString(),v.toString()) }
+plugins {
+    id 'org.quiltmc.loom.no_remap' version '1.15.1'
 }
-plugins { id 'org.quiltmc.loom.no_remap' version "${quilt_loom_version}" }
-repositories { maven { url='https://maven.quiltmc.org/repository/release' }; maven { url='https://maven.fabricmc.net' } }
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://maven.quiltmc.org/repository/release/' }
+    maven { url = 'https://maven.fabricmc.net/' }
+}
+
 dependencies {
- minecraft "com.mojang:minecraft:"+project.minecraft_version
- implementation "org.quiltmc:quilt-loader:"+project.quilt_loader_version
- implementation "net.fabricmc.fabric-api:fabric-api:"+project.fabric_api_version
+    minecraft "com.mojang:minecraft:26.3"
+    implementation "net.fabricmc:fabric-loader:0.19.5"
+    implementation "net.fabricmc.fabric-api:fabric-api:0.161.0+26.3"
 }
-java { toolchain.languageVersion=JavaLanguageVersion.of(25) }
-tasks.withType(JavaCompile).configureEach{options.release=25;options.encoding='UTF-8'}
-sourceSets.main.java.srcDirs=['../common/src/main/java','src/main/java']
-processResources{inputs.property('version',project.version);filesMatching('quilt.mod.json'){expand 'version':project.version}}
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(25)
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = 'UTF-8'
+}
+
+sourceSets.main.java.srcDirs = ["../common/src/main/java", "src/main/java"]

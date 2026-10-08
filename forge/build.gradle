@@ -1,24 +1,48 @@
 plugins {
- id 'java'
- id 'eclipse'
- id 'idea'
- id 'maven-publish'
- id 'net.minecraftforge.gradle' version '[7.0.17,8)'
+    id 'java'
+    id 'eclipse'
+    id 'idea'
+    id 'maven-publish'
+    id 'net.minecraftforge.gradle' version '[7.0.17,8)'
 }
-version=project.version
-group=project.group
-base.archivesName='minegeeks-for-servers-forge'
-java.toolchain.languageVersion=JavaLanguageVersion.of(25)
+
+version = '1.0.0'
+group = 'com.minegeeks'
+
+base {
+    archivesName = 'minegeeks-for-servers-forge'
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
 minecraft {
- mappings channel:'official',version:project.minecraft_version
- runs { server { workingDir = layout.projectDirectory.dir('run'); args '--nogui' } }
+    mappings channel: 'official', version: '26.3'
+
+    runs {
+        configureEach {
+            workingDir = layout.projectDirectory.dir('run')
+        }
+
+        register('server') {
+            args '--nogui'
+        }
+    }
 }
+
 repositories {
- minecraft.mavenizer(it)
- maven fg.forgeMaven
- maven fg.minecraftLibsMaven
- mavenCentral()
+    minecraft.mavenizer(it)
+    maven fg.forgeMaven
+    maven fg.minecraftLibsMaven
+    mavenCentral()
 }
-dependencies { implementation minecraft.dependency('net.minecraftforge:forge:'+project.minecraft_version+'-'+project.forge_version) }
-sourceSets.main.java.srcDirs=['../common/src/main/java','src/main/java']
-tasks.withType(JavaCompile).configureEach { options.release=25; options.encoding='UTF-8' }
+
+dependencies {
+    implementation minecraft.dependency('net.minecraftforge:forge:26.3-66.0.9')
+}
+
+sourceSets.main.java.srcDirs = ["../common/src/main/java", "src/main/java"]
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = 'UTF-8'
+}

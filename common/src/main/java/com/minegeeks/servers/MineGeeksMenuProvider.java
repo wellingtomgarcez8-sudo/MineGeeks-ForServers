@@ -9,6 +9,7 @@ public final class MineGeeksMenuProvider {
     public static SimpleMenuProvider create() {
         return new SimpleMenuProvider(
                 (id, inventory, player) -> new MineGeeksMenu(id, inventory),
-                Component.literal("MineGeeks For Servers"));
+                Component.literal("MineGeeks For Servers")
+        );
     }
 }
