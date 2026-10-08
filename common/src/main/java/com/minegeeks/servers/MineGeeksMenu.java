@@ -8,12 +8,14 @@ import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerInput;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.component.ItemLore;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class MineGeeksMenu extends ChestMenu{
     private static final int SIZE=54,INPUT=13; private final SimpleContainer container;
@@ -21,10 +23,11 @@ public final class MineGeeksMenu extends ChestMenu{
     public MineGeeksMenu(int id,Inventory inv,SimpleContainer c){super(MenuType.GENERIC_9x6,id,inv,c,6);container=c;refresh();}
     private ItemStack button(Item item,String title,String... lore){
         ItemStack s=new ItemStack(item);s.set(DataComponents.CUSTOM_NAME,Component.literal(title));
-        s.set(DataComponents.LORE,new ItemLore(java.util.Arrays.stream(lore).map(Component::literal).toList()));return s;
+        s.set(DataComponents.LORE,new ItemLore(buildLore(lore)));return s;
     }
+    private static List<Component> buildLore(String[] lore){ List<Component> out=new ArrayList<>(); for(String line:lore) out.add(Component.literal(line)); return out; }
     private void refresh(){
-        for(int i=0;i<SIZE;i++)if(i!=INPUT)container.setItem(i,button(Items.GRAY_STAINED_GLASS_PANE," "));
+        for(int i=0;i<SIZE;i++)if(i!=INPUT)container.setItem(i,button(Items.STAINED_GLASS_PANE.gray()," "));
         ItemStack d=container.getItem(INPUT);
         container.setItem(4,button(Items.NETHER_STAR,"GERADOR MineGeeks","Item no slot central.","Encantamentos e poderes próprios."));
         container.setItem(45,button(Items.NETHER_STAR,"Silk Touch","Nível: "+MineGeeksCore.power(d,MineGeeksCore.SILK_KEY),"0/1"));
@@ -61,12 +64,12 @@ public final class MineGeeksMenu extends ChestMenu{
         ServerLevel level=(ServerLevel)sp.level();var pos=MineGeeksCore.generateDelivery(level,sp,out);
         container.setItem(INPUT,ItemStack.EMPTY);sp.sendSystemMessage(Component.literal("MineGeeks: enviado para X="+pos.getX()+" Y="+pos.getY()+" Z="+pos.getZ()));sp.closeContainer();
     }
-    @Override public void clicked(int slot,int button,ClickType type,Player p){
+    @Override public void clicked(int slot,int button,ContainerInput type,Player p){
         if(slot>=45&&slot<=53){action(slot,p);return;} if(slot>=0&&slot<SIZE&&slot!=INPUT)return;super.clicked(slot,button,type,p);
     }
     @Override public ItemStack quickMoveStack(Player p,int index){
         if(index<SIZE)return ItemStack.EMPTY;ItemStack s=p.getInventory().getItem(index-SIZE);if(s.isEmpty()||!container.getItem(INPUT).isEmpty())return ItemStack.EMPTY;
         ItemStack c=s.copyWithCount(1);container.setItem(INPUT,c);s.shrink(1);refresh();broadcastChanges();return c;
     }
-    @Override public void removed(Player p){super.removed(p);ItemStack in=container.getItem(INPUT);if(!in.isEmpty()){p.getInventory().placeItemBackInInventory(in.copy());container.setItem(INPUT,ItemStack.EMPTY);}}
+    @Override public void removed(Player p){super.removed(p);ItemStack in=container.getItem(INPUT);if(!in.isEmpty()){p.getInventory().placeItemBackInInventory(in.copy(),net.minecraft.util.Prediction.SERVER_ONLY);container.setItem(INPUT,ItemStack.EMPTY);}}
 }
