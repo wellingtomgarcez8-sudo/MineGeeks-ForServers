@@ -11,6 +11,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -53,7 +54,7 @@ public final class MineGeeksCore {
     public static boolean isCosmicStar(ItemStack s){
         if(s.isEmpty()||s.getItem()!=Items.NETHER_STAR)return false;
         CustomData d=s.get(DataComponents.CUSTOM_DATA);
-        return d!=null&&d.copyTag().getBoolean(STAR_KEY);
+        return d!=null&&d.copyTag().getBoolean(STAR_KEY).orElse(false);
     }
     public static CompoundTag customData(ItemStack s){
         CustomData d=s.get(DataComponents.CUSTOM_DATA);
@@ -62,16 +63,16 @@ public final class MineGeeksCore {
     public static void setCustomData(ItemStack s,CompoundTag t){
         if(t.isEmpty())s.remove(DataComponents.CUSTOM_DATA); else s.set(DataComponents.CUSTOM_DATA,CustomData.of(t));
     }
-    public static boolean isGenerated(ItemStack s){return customData(s).getBoolean(POWER_KEY);}
-    public static int power(ItemStack s,String k){return customData(s).getInt(k);}
-    public static boolean flag(ItemStack s,String k){return customData(s).getBoolean(k);}
+    public static boolean isGenerated(ItemStack s){return customData(s).getBoolean(POWER_KEY).orElse(false);}
+    public static int power(ItemStack s,String k){return customData(s).getInt(k).orElse(0);}
+    public static boolean flag(ItemStack s,String k){return customData(s).getBoolean(k).orElse(false);}
     public static ItemStack makeGenerated(ItemStack src){
         ItemStack out=src.copy(); CompoundTag t=customData(out); t.putBoolean(POWER_KEY,true); setCustomData(out,t);
         out.set(DataComponents.CUSTOM_NAME,Component.literal("MineGeeks: "+src.getHoverName().getString()));
         return out;
     }
     public static void toggleLevel(ItemStack s,String key,int max){
-        CompoundTag t=customData(s); int v=t.getInt(key); v=v>=max?0:v+1; t.putInt(key,v); t.putBoolean(POWER_KEY,true); setCustomData(s,t);
+        CompoundTag t=customData(s); int v=t.getInt(key).orElse(0); v=v>=max?0:v+1; t.putInt(key,v); t.putBoolean(POWER_KEY,true); setCustomData(s,t);
     }
     public static void toggleFlag(ItemStack s,String key){
         CompoundTag t=customData(s); t.putBoolean(key,!t.getBoolean(key)); t.putBoolean(POWER_KEY,true); setCustomData(s,t);
@@ -89,14 +90,14 @@ public final class MineGeeksCore {
             level.setBlock(pos,Blocks.AIR.defaultBlockState(),Block.UPDATE_ALL);
             if(!clone.isEmpty())Block.popResource(level,pos,clone);
             state.spawnAfterBreak(level,pos,tool,true);
-            damageToolIfNeeded(tool);
+            damageToolIfNeeded(player,tool);
             return;
         }
         List<ItemStack> drops=Block.getDrops(state,level,pos,be,player,tool);
         level.setBlock(pos,Blocks.AIR.defaultBlockState(),Block.UPDATE_ALL);
         for(ItemStack d:drops){
             if(ore&&fortune>0){
-                int mult=1+level.random.nextInt(fortune+1);
+                int mult=1+level.getRandom().nextInt(fortune+1);
                 d=d.copyWithCount(Math.min(d.getMaxStackSize(),d.getCount()*mult));
             }
             if(!d.isEmpty())Block.popResource(level,pos,d);
@@ -104,9 +105,9 @@ public final class MineGeeksCore {
         state.spawnAfterBreak(level,pos,tool,true);
         damageToolIfNeeded(tool);
     }
-    private static void damageToolIfNeeded(ItemStack tool){
+    private static void damageToolIfNeeded(ServerPlayer player, ItemStack tool){
         if(flag(tool,UNBREAKABLE_KEY))return;
-        if(tool.isDamageableItem())tool.hurtAndBreak(1, null, e->{});
+        if(tool.isDamageableItem())tool.hurtAndBreak(1, player, EquipmentSlot.MAINHAND);
     }
 
     public static void wardenBurst(ServerLevel level,ServerPlayer player,ItemStack source){
@@ -122,7 +123,7 @@ public final class MineGeeksCore {
         level.playSound(null,player.blockPosition(),net.minecraft.sounds.SoundEvents.WARDEN_SONIC_BOOM,net.minecraft.sounds.SoundSource.PLAYERS,2,1);
         if(hit!=null){
             float damage=12+Math.min(40,power(source,WARDEN_KEY)*4);
-            hit.hurt(level.damageSources().sonicBoom(player),damage);
+            hit.hurtServer(level,level.damageSources().sonicBoom(player),damage);
             Vec3 push=dir.scale(2.2);hit.push(push.x,.45,push.z);
         }
     }
@@ -137,19 +138,19 @@ public final class MineGeeksCore {
     }
 
     public static void maintainStar(ServerPlayer p){
-        if(!p.hasPermissions(2))return;
+        if(!p.permissions().hasPermission(net.minecraft.server.permissions.Permissions.COMMANDS_GAMEMASTER))return;
         ItemStack star=null;
-        for(int i=0;i<p.getInventory().items.size();i++){
-            ItemStack s=p.getInventory().items.get(i);
-            if(isCosmicStar(s)){if(star==null)star=s;p.getInventory().items.set(i,ItemStack.EMPTY);}
+        for(int i=0;i<p.getInventory().getContainerSize();i++){
+            ItemStack s=p.getInventory().getItem(i);
+            if(isCosmicStar(s)){if(star==null)star=s;p.getInventory().setItem(i,ItemStack.EMPTY);}
         }
-        ItemStack last=p.getInventory().items.get(8);
+        ItemStack last=p.getInventory().getItem(8);
         if(star==null)star=cosmicStar();
         if(!last.isEmpty()&&!isCosmicStar(last)){
-            p.getInventory().items.set(8,ItemStack.EMPTY);
+            p.getInventory().setItem(8,ItemStack.EMPTY);
             p.getInventory().placeItemBackInInventory(last);
         }
-        p.getInventory().items.set(8,star);
+        p.getInventory().setItem(8,star);
         for(Entity e:p.level().getEntities(p,p.getBoundingBox().inflate(2),x->x instanceof ItemEntity ie&&isCosmicStar(ie.getItem())))e.discard();
     }
 
@@ -158,15 +159,6 @@ public final class MineGeeksCore {
         out.store("item",ItemStack.CODEC,stack);
         return out.buildResult().getCompound("item").orElse(new CompoundTag());
     }
-    public static void protectGeneratedEntities(ServerLevel level){
-        for(Entity e:level.getEntities().getAll()){
-            if(e instanceof ItemEntity item && isGenerated(item.getItem()) && flag(item.getItem(),UNBREAKABLE_KEY)){
-                item.setInvulnerable(true);
-                item.setNoGravity(false);
-            }
-        }
-    }
-
     public static void prepareOutputShulker(ServerLevel level,ServerPlayer player,BlockPos pos){
         CompoundTag boxData=new CompoundTag(); boxData.putString("id","minecraft:shulker_box");
         ListTag items=new ListTag();
@@ -180,12 +172,12 @@ public final class MineGeeksCore {
         player.getInventory().placeItemBackInInventory(shulker);
     }
     public static BlockPos randomDeliveryPosition(ServerLevel level,ServerPlayer p){
-        RandomSource r=level.random;double a=r.nextDouble()*Math.PI*2,d=Math.sqrt(r.nextDouble())*2000;
+        RandomSource r=level.getRandom();double a=r.nextDouble()*Math.PI*2,d=Math.sqrt(r.nextDouble())*2000;
         return new BlockPos(Mth.floor(p.getX()+Math.cos(a)*d),Mth.nextInt(r,-50,100),Mth.floor(p.getZ()+Math.sin(a)*d));
     }
     public static BlockPos generateDelivery(ServerLevel level,ServerPlayer p,ItemStack generated){
         BlockPos pos=randomDeliveryPosition(level,p);ChunkPos c=new ChunkPos(pos);
-        level.getChunk(c.x,c.z,ChunkStatus.FULL,true);
+        level.getChunk(c.x(),c.z(),ChunkStatus.FULL,true);
         level.setBlock(pos,Blocks.CHEST.defaultBlockState().setValue(ChestBlock.FACING,p.getDirection().getOpposite()),Block.UPDATE_ALL);
         BlockEntity e=level.getBlockEntity(pos);if(e instanceof ChestBlockEntity chest){chest.setItem(0,generated.copy());chest.setChanged();}
         prepareOutputShulker(level,p,pos);return pos;
