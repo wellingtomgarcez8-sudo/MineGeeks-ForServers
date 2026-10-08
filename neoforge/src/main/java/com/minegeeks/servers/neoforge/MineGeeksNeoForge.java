@@ -16,6 +16,7 @@ public final class MineGeeksNeoForge {
     public static final String MODID = "minegeeks_for_servers";
 
     public MineGeeksNeoForge() {
+        MineGeeksCore.initialize();
         NeoForge.EVENT_BUS.register(this);
     }
 
