@@ -1,6 +1,6 @@
 # MineGeeks For Servers
 
-Minecraft 26.3 server-side-only mod.
+Minecraft 26.3 gameplay mod with custom cosmic mechanics and powers.
 
 Platforms:
 - Fabric 26.3
@@ -9,6 +9,6 @@ Platforms:
 - Quilt 26.3
 - Java 25
 
-The Cosmic Star is implemented as a tagged vanilla Nether Star because a truly server-only custom registry item cannot be rendered by a vanilla client.
+The Cosmic Star is a registered custom item and is available on both client and server. Install the matching JAR on both sides for multiplayer.
 
 The GitHub Actions workflow builds all four platform JARs and publishes them as workflow artifacts and a release.
