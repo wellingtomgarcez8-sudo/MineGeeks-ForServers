@@ -9,6 +9,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.Mth;
 import net.minecraft.util.Prediction;
+import net.minecraft.util.Unit;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -94,7 +95,7 @@ public final class MineGeeksCore {
 
         BlockEntity blockEntity=level.getBlockEntity(pos); boolean ore=isOre(state);
         if(silk>0&&!(ore&&efficiency)){
-            ItemStack clone=state.getBlock().asItem().getDefaultInstance();
+            ItemStack clone=state.getCloneItemStack(level,pos,false);
             level.setBlock(pos,Blocks.AIR.defaultBlockState(),Block.UPDATE_ALL);
             if(!clone.isEmpty())Block.popResource(level,pos,clone);
             state.spawnAfterBreak(level,pos,tool,true);
@@ -106,7 +107,7 @@ public final class MineGeeksCore {
         level.setBlock(pos,Blocks.AIR.defaultBlockState(),Block.UPDATE_ALL);
         for(ItemStack drop:drops){
             if(ore&&fortune>0){
-                int multiplier=1+level.random.nextInt(fortune+1);
+                int multiplier=1+level.getRandom().nextInt(fortune+1);
                 drop=drop.copyWithCount(Math.min(drop.getMaxStackSize(),drop.getCount()*multiplier));
             }
             if(!drop.isEmpty())Block.popResource(level,pos,drop);
@@ -167,22 +168,22 @@ public final class MineGeeksCore {
     }
 
     public static void maintainStar(ServerPlayer player){
-        if(!player.hasPermissions(2))return;
+        if(player.level().getServer()==null||!player.level().getServer().getPlayerList().isOp(player.nameAndId()))return;
         ItemStack star=null;
-        for(int i=0;i<player.getInventory().items.size();i++){
-            ItemStack stack=player.getInventory().items.get(i);
+        for(int i=0;i<player.getInventory().getContainerSize();i++){
+            ItemStack stack=player.getInventory().getItem(i);
             if(isCosmicStar(stack)){
                 if(star==null)star=stack;
-                player.getInventory().items.set(i,ItemStack.EMPTY);
+                player.getInventory().setItem(i,ItemStack.EMPTY);
             }
         }
         if(star==null)star=cosmicStar();
-        ItemStack last=player.getInventory().items.get(8);
+        ItemStack last=player.getInventory().getItem(8);
         if(!last.isEmpty()&&!isCosmicStar(last)){
             player.getInventory().items.set(8,ItemStack.EMPTY);
             if(!player.getInventory().add(last))player.drop(last,false,Prediction.SERVER_ONLY);
         }
-        player.getInventory().items.set(8,star);
+        player.getInventory().setItem(8,star);
         for(Entity entity:player.level().getEntities(player,player.getBoundingBox().inflate(3.0),
                 e->e instanceof ItemEntity ie&&isCosmicStar(ie.getItem()))){
             entity.discard();
@@ -202,7 +203,7 @@ public final class MineGeeksCore {
         setCustomData(paper,paperData);
         contents.set(26,paper);
 
-        ItemStack shulker=new ItemStack(Items.DYED_SHULKER_BOX.asList().get(DyeColor.BLACK.ordinal()));
+        ItemStack shulker=Items.DYED_SHULKER_BOX.asItem(DyeColor.BLACK);
         shulker.set(DataComponents.CONTAINER,ItemContainerContents.fromItems(contents));
         shulker.set(DataComponents.CUSTOM_NAME,Component.literal("Entrega Cósmica"));
         CompoundTag shulkerData=new CompoundTag();shulkerData.putBoolean("MineGeeksDelivery",true);setCustomData(shulker,shulkerData);
@@ -211,7 +212,7 @@ public final class MineGeeksCore {
     }
 
     public static BlockPos randomDeliveryPosition(ServerLevel level,ServerPlayer player){
-        RandomSource random=level.random;
+        RandomSource random=level.getRandom();
         double angle=random.nextDouble()*Math.PI*2.0;
         double distance=Math.sqrt(random.nextDouble())*2000.0;
         return new BlockPos(
