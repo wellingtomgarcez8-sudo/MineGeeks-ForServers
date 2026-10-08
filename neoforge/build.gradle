@@ -1,11 +1,62 @@
-plugins{id 'java-library';id 'net.neoforged.gradle.userdev' version '7.1.39'}
-version=project.mod_version
-group=project.mod_group_id
-base.archivesName='minegeeks-for-servers-neoforge'
-java.toolchain.languageVersion=JavaLanguageVersion.of(25)
-repositories{}
-dependencies{implementation "net.neoforged:neoforge:"+project.neo_version}
-sourceSets.main.java.srcDirs=['../common/src/main/java','src/main/java']
-tasks.withType(JavaCompile).configureEach{options.release=25;options.encoding='UTF-8'}
-processResources{inputs.properties([minecraft_version:project.minecraft_version,neo_version:project.neo_version,mod_id:project.mod_id,mod_name:project.mod_name,mod_license:project.mod_license,mod_version:project.mod_version]);filesMatching(['META-INF/neoforge.mods.toml']){expand(inputs.properties.get())}}
-runs{server{workingDirectory project.layout.projectDirectory.dir('run');argument '--nogui';modSource project.sourceSets.main}}
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.gradle.userdev' version '7.1.39'
+}
+
+version = mod_version
+group = mod_group_id
+
+base {
+    archivesName = mod_id
+}
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "net.neoforged:neoforge:${neo_version}"
+}
+
+sourceSets.main.resources {
+    srcDir('../common/src/main/resources')
+}
+
+sourceSets {
+    main {
+        java.srcDirs = ["../common/src/main/java", "src/main/java"]
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.release = 25
+    options.encoding = 'UTF-8'
+}
+
+tasks.withType(ProcessResources).configureEach {
+    def replaceProperties = [
+        minecraft_version: minecraft_version,
+        minecraft_version_range: minecraft_version_range,
+        neo_version: neo_version,
+        mod_id: mod_id,
+        mod_name: mod_name,
+        mod_license: mod_license,
+        mod_version: mod_version
+    ]
+    inputs.properties replaceProperties
+
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand replaceProperties
+    }
+}
+
+runs {
+    server {
+        workingDirectory project.layout.projectDirectory.dir('run')
+        argument '--nogui'
+        modSource project.sourceSets.main
+    }
+}
